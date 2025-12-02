@@ -71,6 +71,42 @@
       },
       "description": "minuutplans 1832 van de tileserver."
     },
+    "brk_kadastraal": {
+      "id": "brk_kadastraal",
+      "name": "moderne percelen",
+      "type": "tilejson",
+      "url": "https://api.pdok.nl/kadaster/brk-kadastrale-kaart/ogc/v1/tiles/WebMercatorQuad?f=tilejson",
+      "options": {
+        "vectorTileLayerStyles": {
+          "perceel_vlak": {
+            "fillColor": "#fff7cc",
+            "fillOpacity": 0.9,
+            "color": "#d4aa00",
+            "weight": 0.5,
+            "opacity": 1
+          },
+          "perceel_grens": {
+            "color": "#b38b00",
+            "weight": 1,
+            "opacity": 1,
+            "fill": false
+          },
+          "kadastrale_grens": {
+            "color": "#000000",
+            "weight": 1.5,
+            "opacity": 1,
+            "fill": false
+          },
+          "nummer_aanduiding": {
+            "icon": false
+          }
+        },
+        "interactive": true,
+        "minZoom": 6,
+        "maxZoom": 19
+      },
+      "description": "Vereenvoudigde stijl gebaseerd op de BRK standaardvisualisatie (percelen lichtgeel, grenzen donker, nummers als labels)."
+    },
     "srtm_wms": {
       "id": "srtm_wms",
       "name": "Mundialis SRTM30 Colored (WMS)",

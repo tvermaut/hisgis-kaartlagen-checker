@@ -196,13 +196,39 @@
         layer.on('tileloadstart', (e) => {
           if (e.tile && e.tile.src) logMessage('start', layerId + ' → ' + e.tile.src);
         });
-        layer.on('tileload', () => logMessage('ok', layerId + ' ✓'));
-        layer.on('tileerror', () => logMessage('error', layerId + ' ✗'));
+        layer.on('tileload', (e) => {
+          if (e.tile && e.tile.src) {
+            logMessage('ok', layerId + ' ✓ ' + e.tile.src);
+          } else {
+            logMessage('ok', layerId + ' ✓');
+          }
+        });
+
+        layer.on('tileerror', (e) => {
+          if (e.tile && e.tile.src) {
+            logMessage('error', layerId + ' ✗ ' + e.tile.src);
+          } else {
+            logMessage('error', layerId + ' ✗ (onbekende tile)');
+          }
+        });
       } else {
         // MVT/TileJSON tiles
         layer.on('loading', () => logMessage('start', layerId + ' MVT loading...'));
-        layer.on('load', () => logMessage('ok', layerId + ' MVT ✓'));
-        layer.on('error', (e) => logMessage('error', layerId + ' MVT ✗'));
+        layer.on('tileload', (e) => {
+          if (e.tile && e.tile.src) {
+            logMessage('ok', layerId + ' ✓ ' + e.tile.src);
+          } else {
+            logMessage('ok', layerId + ' ✓');
+          }
+        });
+
+        layer.on('tileerror', (e) => {
+          if (e.tile && e.tile.src) {
+            logMessage('error', layerId + ' ✗ ' + e.tile.src);
+          } else {
+            logMessage('error', layerId + ' ✗ (onbekende tile)');
+          }
+        });
       }
     }
 
