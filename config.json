@@ -73,39 +73,71 @@
     },
     "brk_kadastraal": {
       "id": "brk_kadastraal",
-      "name": "moderne percelen",
+      "name": "moderne kadastrale percelen",
       "type": "tilejson",
       "url": "https://api.pdok.nl/kadaster/brk-kadastrale-kaart/ogc/v1/tiles/WebMercatorQuad?f=tilejson",
       "options": {
         "vectorTileLayerStyles": {
-          "perceel_vlak": {
-            "fillColor": "#fff7cc",
-            "fillOpacity": 0.9,
-            "color": "#d4aa00",
-            "weight": 0.5,
-            "opacity": 1
-          },
-          "perceel_grens": {
-            "color": "#b38b00",
+          "pand": {
+            "color": "#C10101",
             "weight": 1,
-            "opacity": 1,
+            "fill": false
+          },
+          "pand_nummeraanduiding": {
+            "icon": false
+          },
+          "openbareruimtelabel": {
+            "icon": false
+          },
+          "perceel_bijpijling": {
+            "color": "#000001",
+            "weight": 1,
             "fill": false
           },
           "kadastrale_grens": {
-            "color": "#000000",
+            "color": "#000001",
             "weight": 1.5,
-            "opacity": 1,
             "fill": false
           },
-          "nummer_aanduiding": {
+          "kadastrale_grens_voorlopig": {
+            "color": "#CC9900",
+            "weight": 1.5,
+            "dashArray": "4,4",
+            "fill": false
+          },
+          "kadastrale_grens_administratief": {
+            "color": "#5CF6D1",
+            "weight": 1.5,
+            "dashArray": "8,4",
+            "fill": false
+          },
+          "perceel_label": {
             "icon": false
+          },
+          "nummeraanduidingreeks": {
+            "icon": false,
+            "paint": {
+              "text-color": "#C10101"
+            }
+          },
+          "water_openbareruimtelabel": {
+            "icon": false,
+            "paint": {
+              "text-color": "#000000"
+            }
+          },
+          "weg_openbareruimtelabel": {
+            "icon": false,
+            "paint": {
+              "text-color": "#000000"
+            }
           }
         },
         "interactive": true,
-        "minZoom": 6,
+        "minZoom": 12,
         "maxZoom": 19
       },
-      "description": "Vereenvoudigde stijl gebaseerd op de BRK standaardvisualisatie (percelen lichtgeel, grenzen donker, nummers als labels)."
+      "description": "BRK standaardvisualisatie met panden, kadastrale grenzen, labels en bijpijling."
     },
     "srtm_wms": {
       "id": "srtm_wms",
