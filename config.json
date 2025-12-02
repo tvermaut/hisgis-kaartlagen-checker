@@ -26,20 +26,39 @@
       },
       "description": "HisGIS 1832 in OSM stijl"
     },
-    "gemeentegrenzen2025": {
-      "id": "gemeentegrenzen2025",
+    "pdok_bestuurlijke_gebieden": {
+      "id": "pdok_bestuurlijke_gebieden",
       "name": "moderne gemeentegrenzen",
       "type": "mvt",
-      "url": "https://api.pdok.nl/kadaster/bestuurlijkegebieden/ogc/v1/tiles/WebMercatorQuad/{z}/{x}/{y}?f=mvt",
+      "url": "https://api.pdok.nl/kadaster/bestuurlijkegebieden/ogc/v1/collections/bestuurlijkegebieden/tiles/WebMercatorQuad/{z}/{x}/{y}.pbf",
       "options": {
-        "maxZoom": 17,
-            "vectorTileLayerStyles": {
-            "gemeentegebied":  {"type": "line", "paint": {"line-color": "rgb(  0, 0,   0)","line-width": 1 }},
-            "provinciegebied": {"type": "line", "paint": {"line-color": "rgb(255, 0,   0)","line-width": 2 }},
-            "landgebied":      {"type": "line", "paint": {"line-color": "rgb(  0, 0, 255)","line-width": 2 }}
-            }
+        "vectorTileLayerStyles": {
+          "gemeenten": {
+            "fillColor": "#ff8c42",
+            "fillOpacity": 0.4,
+            "weight": 1,
+            "color": "#e67e22",
+            "opacity": 0.9
+          },
+          "provincies": {
+            "fillColor": "#3498db",
+            "fillOpacity": 0.3,
+            "weight": 2,
+            "color": "#2980b9",
+            "dashArray": "6, 6",
+            "opacity": 1
+          },
+          "rijksgrens": {
+            "weight": 4,
+            "color": "#e74c3c",
+            "opacity": 1,
+            "fill": false
+          }
+        },
+        "interactive": true,
+        "maxZoom": 14
       },
-      "description": "Moderne gemeente-grenzen afkomstig van het kadaster."
+      "description": "PDOK Bestuurlijke Gebieden vector tiles met gemeenten, provincies en rijksgrens in één laag."
     },
     "minuutplans": {
       "id": "minuutplans",
