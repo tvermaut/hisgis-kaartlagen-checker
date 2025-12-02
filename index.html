@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <title>Leaflet WMS/WMTS/XYZ viewer</title>
+  <title>Leaflet WMS/WMTS/XYZ/MVT viewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- Leaflet CSS -->
   <link
@@ -11,6 +11,8 @@
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
   />
+  <!-- Leaflet.VectorGrid CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/VectorGrid.css" />
   <style>
     html, body {
       height: 100%;
@@ -141,6 +143,8 @@
       display: none;
       white-space: pre-wrap;
       word-break: break-all;
+      max-height: 400px;
+      overflow-y: auto;
     }
     #layer-info-close {
       float: right;
@@ -183,6 +187,8 @@
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet.VectorGrid JS (voor MVT) -->
+  <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.js"></script>
 
   <script>
     let LAYERS = {};
@@ -279,29 +285,47 @@
     }
 
     function createLeafletLayer(layerConfig) {
+      const opts = layerConfig.options || {};
+      
       if (layerConfig.type === 'wms') {
-        return L.tileLayer.wms(layerConfig.url, layerConfig.options);
+        return L.tileLayer.wms(layerConfig.url, opts);
       } else if (layerConfig.type === 'xyz') {
-        return L.tileLayer(layerConfig.url, layerConfig.options);
+        return L.tileLayer(layerConfig.url, opts);
+      } else if (layerConfig.type === 'mvt') {
+        // MVT via Leaflet.VectorGrid.protobuf
+        return L.vectorGrid.protobuf(layerConfig.url, opts);
       }
       return null;
     }
 
     function attachLoggingToLayer(layer, layerId) {
       if (!layer) return;
-      layer.on('tileloadstart', function (e) {
-        if (e.tile && e.tile.src) {
-          logMessage('start', layerId + ' → ' + e.tile.src);
-        }
-      });
-      layer.on('tileload', function (e) {
-        if (e.tile && e.tile.src) {
+      
+      // Voor raster tiles (WMS/XYZ)
+      if (layerConfig && layerConfig.type !== 'mvt') {
+        layer.on('tileloadstart', function (e) {
+          if (e.tile && e.tile.src) {
+            logMessage('start', layerId + ' → ' + e.tile.src);
+          }
+        });
+        layer.on('tileload', function (e) {
           logMessage('ok', layerId + ' ✓');
-        }
-      });
-      layer.on('tileerror', function (e) {
-        logMessage('error', layerId + ' ✗');
-      });
+        });
+        layer.on('tileerror', function (e) {
+          logMessage('error', layerId + ' ✗');
+        });
+      } else {
+        // Voor MVT: log tile loads via loading event
+        layer.on('loading', function() {
+          logMessage('start', layerId + ' MVT loading...');
+        });
+        layer.on('load', function() {
+          logMessage('ok', layerId + ' MVT ✓');
+        });
+        layer.on('error', function(e) {
+          logMessage('error', layerId + ' MVT ✗: ' + (e.msg || 'onbekend'));
+        });
+      }
     }
 
     function setActiveLayer(layerId) {
@@ -311,11 +335,15 @@
       }
       const layerCfg = LAYERS[layerId];
       const newLayer = createLeafletLayer(layerCfg);
+      if (!newLayer) {
+        logMessage('error', 'Laag ' + layerId + ' kan niet aangemaakt worden');
+        return;
+      }
       activeLayer = newLayer;
       activeLayerId = layerId;
       attachLoggingToLayer(activeLayer, layerId);
       activeLayer.addTo(map);
-      logMessage('info', 'Actieve laag: ' + layerCfg.name);
+      logMessage('info', 'Actieve laag: ' + layerCfg.name + ' (' + layerCfg.type + ')');
       updateUrlFromMap();
     }
 
@@ -350,7 +378,7 @@
 
         const label = document.createElement('label');
         label.setAttribute('for', radio.id);
-        label.textContent = cfg.name;
+        label.textContent = cfg.name + ' [' + cfg.type.toUpperCase() + ']';
 
         const infoBtn = document.createElement('button');
         infoBtn.className = 'info-btn';
@@ -384,7 +412,7 @@
       const infoObj = {
         id: cfg.id,
         name: cfg.name,
-        type: cfg.type,
+        type: cfg.type.toUpperCase(),
         url: cfg.url,
         options: cfg.options,
         description: cfg.description

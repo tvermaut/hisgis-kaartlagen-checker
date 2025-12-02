@@ -7,27 +7,44 @@
   "layers": {
     "osm": {
       "id": "osm",
-      "name": "OSM (XYZ)",
+      "name": "moderne OSM",
       "type": "xyz",
       "url": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       "options": {
         "maxZoom": 19,
         "attribution": "© OpenStreetMap contributors"
       },
-      "description": "Standaard OpenStreetMap-achtergrond (XYZ-tiles)."
+      "description": "Standaard moderne OpenStreetMap-achtergrond (XYZ-tiles)."
     },
-    "topo_wms": {
-      "id": "topo_wms",
-      "name": "Mundialis TOPO-WMS (WMS)",
+    "osm1832": {
+      "id": "osm1832",
+      "name": "Kadaster 1832 (OSM stijl)",
       "type": "wms",
-      "url": "https://ows.mundialis.de/services/service?",
+      "url": "https://geoservices.hisgis.nl/wmts/osm1832/{z}/{x}}/{y}.png",
       "options": {
-        "layers": "TOPO-WMS",
-        "format": "image/png",
-        "transparent": true,
-        "attribution": "© mundialis, OSM contributors"
+        "maxZoom": 24
       },
-      "description": "WMS-laag TOPO-WMS via mundialis OGC-service."
+      "description": "HisGIS 1832 in OSM stijl"
+    },
+    "gemeentegrenzen2025": {
+      "id": "gemeentegrenzen2025",
+      "name": "moderne gemeentegrenzen",
+      "type": "mvt",
+      "url": "https://api.pdok.nl/kadaster/bestuurlijkegebieden/ogc/v1/tiles/WebMercatorQuad/{z}/{x}/{y}?f=mvt",
+      "options": {
+        "maxZoom": 24
+      },
+      "description": "minuutplans 1832 van de tileserver."
+    },
+    "minuutplans": {
+      "id": "minuutplans",
+      "name": "minuutplans 1832 OSM",
+      "type": "xyz",
+      "url": "https://geoservices.hisgis.nl/tiles/minuutplans/{z}/{x}/{y}",
+      "options": {
+        "maxZoom": 24
+      },
+      "description": "minuutplans 1832 van de tileserver."
     },
     "srtm_wms": {
       "id": "srtm_wms",
