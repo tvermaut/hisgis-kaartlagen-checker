@@ -33,14 +33,14 @@
       "url": "https://api.pdok.nl/kadaster/bestuurlijkegebieden/ogc/v1/tiles/WebMercatorQuad?f=tilejson",
       "options": {
         "vectorTileLayerStyles": {
-          "gemeenten": {
+          "gemeentegebied": {
             "fillColor": "#ff8c42",
             "fillOpacity": 0.4,
             "weight": 1,
             "color": "#e67e22",
             "opacity": 0.9
           },
-          "provincies": {
+          "provinciegebied": {
             "fillColor": "#3498db",
             "fillOpacity": 0.3,
             "weight": 2,
@@ -48,7 +48,7 @@
             "dashArray": "6, 6",
             "opacity": 1
           },
-          "rijksgrens": {
+          "landgebied": {
             "weight": 4,
             "color": "#e74c3c",
             "opacity": 1,
