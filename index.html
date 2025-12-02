@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <title>Leaflet WMS/WMTS/XYZ viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <style>
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 120px;
+    }
+    #log-panel {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 120px;
+      background: #111;
+      color: #eee;
+      font-family: monospace;
+      font-size: 11px;
+      overflow-y: auto;
+      border-top: 1px solid #555;
+      padding: 4px;
+      box-sizing: border-box;
+    }
+    #log-panel h3 {
+      margin: 0 0 4px 0;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .log-entry {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .log-time {
+      color: #8f8;
+    }
+    .log-type {
+      color: #f88;
+      margin-right: 4px;
+    }
+    .crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      margin-left: -12px;
+      margin-top: -12px;
+      pointer-events: none;
+      z-index: 500;
+    }
+    .crosshair:before,
+    .crosshair:after {
+      content: "";
+      position: absolute;
+      background: rgba(255, 0, 0, 0.8);
+    }
+    .crosshair:before {
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      transform: translateX(-0.5px);
+    }
+    .crosshair:after {
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      transform: translateY(-0.5px);
+    }
+    .layer-control {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: white;
+      padding: 6px 8px;
+      border-radius: 4px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.3);
+      font-family: sans-serif;
+      font-size: 12px;
+      max-width: 260px;
+    }
+    .layer-control h4 {
+      margin: 0 0 4px 0;
+      font-size: 13px;
+    }
+    .layer-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+    .layer-item label {
+      flex: 1;
+      cursor: pointer;
+    }
+    .layer-item button.info-btn {
+      margin-left: 4px;
+      border: none;
+      background: #eee;
+      border-radius: 3px;
+      cursor: pointer;
+      padding: 0 5px;
+      font-size: 11px;
+    }
+    .layer-item button.info-btn:hover {
+      background: #ddd;
+    }
+    #layer-info {
+      position: absolute;
+      right: 10px;
+      top: 80px;
+      z-index: 1001;
+      max-width: 300px;
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.3);
+      padding: 6px 8px;
+      font-family: monospace;
+      font-size: 11px;
+      display: none;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    #layer-info-close {
+      float: right;
+      cursor: pointer;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2000;
+      background: rgba(255,255,255,0.9);
+      padding: 20px;
+      border-radius: 4px;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="crosshair"></div>
+
+  <div class="layer-control" id="layer-control">
+    <h4>Laden...</h4>
+  </div>
+
+  <div id="layer-info">
+    <span id="layer-info-close">✕</span>
+    <div id="layer-info-content"></div>
+  </div>
+
+  <div id="log-panel">
+    <h3>Netwerk-log</h3>
+    <div>Wachten op eerste laag...</div>
+  </div>
+
+  <div id="loading">Laden van configuratie...</div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    let LAYERS = {};
+    let DEFAULT_CONFIG = { lat: 52.1, lng: 5.1, zoom: 7 };
+
+    // ---------- Config laden ----------
+    async function loadConfig() {
+      try {
+        const response = await fetch('config.json');
+        if (!response.ok) throw new Error('Config niet gevonden');
+        const config = await response.json();
+        DEFAULT_CONFIG = config.default || DEFAULT_CONFIG;
+        LAYERS = config.layers || {};
+        if (Object.keys(LAYERS).length === 0) {
+          throw new Error('Geen lagen gevonden in config');
+        }
+        document.getElementById('loading').style.display = 'none';
+        initMap();
+      } catch (error) {
+        console.error('Config fout:', error);
+        document.getElementById('loading').innerHTML = 
+          'Fout: config.json niet geladen.<br>Controleer pad en CORS.';
+        document.getElementById('log-panel').innerHTML += 
+          '<div style="color:#f88;">Config laad-fout: ' + error.message + '</div>';
+      }
+    }
+
+    // ---------- URL helpers ----------
+    function getUrlParams() {
+      const params = {};
+      const query = window.location.search.substring(1);
+      const vars = query.split('&');
+      for (let i = 0; i < vars.length; i++) {
+        if (!vars[i]) continue;
+        const pair = vars[i].split('=');
+        const key = decodeURIComponent(pair[0]);
+        const value = decodeURIComponent(pair[1] || '');
+        params[key] = value;
+      }
+      return params;
+    }
+
+    function updateUrlParams(params) {
+      const current = getUrlParams();
+      const merged = Object.assign({}, current, params);
+      const queryParts = [];
+      for (const key in merged) {
+        if (merged[key] === null || merged[key] === undefined || merged[key] === '') {
+          continue;
+        }
+        queryParts.push(
+          encodeURIComponent(key) + '=' + encodeURIComponent(merged[key])
+        );
+      }
+      const newQuery = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
+      const newUrl = window.location.pathname + newQuery + window.location.hash;
+      window.history.replaceState(null, '', newUrl);
+    }
+
+    // ---------- Netwerk-log ----------
+    const logPanel = document.getElementById('log-panel');
+    function logMessage(type, msg) {
+      const time = new Date().toISOString().substr(11, 8);
+      const div = document.createElement('div');
+      div.className = 'log-entry';
+      div.innerHTML = 
+        '<span class="log-time">[' + time + ']</span> ' +
+        '<span class="log-type">' + type + ':</span> ' + msg;
+      logPanel.appendChild(div);
+      logPanel.scrollTop = logPanel.scrollHeight;
+    }
+
+    // ---------- Map ----------
+    let map, activeLayerId, activeLayer;
+
+    function initMap() {
+      const params = getUrlParams();
+      const startLat = params.y ? parseFloat(params.y) : DEFAULT_CONFIG.lat;
+      const startLng = params.x ? parseFloat(params.x) : DEFAULT_CONFIG.lng;
+      const startZoom = params.z ? parseInt(params.z, 10) : DEFAULT_CONFIG.zoom;
+      const startLayerId = params.laag && LAYERS[params.laag] ? params.laag : Object.keys(LAYERS)[0];
+
+      map = L.map('map', {
+        center: [startLat, startLng],
+        zoom: startZoom
+      });
+
+      activeLayerId = startLayerId;
+      setActiveLayer(activeLayerId);
+
+      buildLayerList();
+      map.on('moveend zoomend', updateUrlFromMap);
+      updateUrlFromMap();
+    }
+
+    function createLeafletLayer(layerConfig) {
+      if (layerConfig.type === 'wms') {
+        return L.tileLayer.wms(layerConfig.url, layerConfig.options);
+      } else if (layerConfig.type === 'xyz') {
+        return L.tileLayer(layerConfig.url, layerConfig.options);
+      }
+      return null;
+    }
+
+    function attachLoggingToLayer(layer, layerId) {
+      if (!layer) return;
+      layer.on('tileloadstart', function (e) {
+        if (e.tile && e.tile.src) {
+          logMessage('start', layerId + ' → ' + e.tile.src);
+        }
+      });
+      layer.on('tileload', function (e) {
+        if (e.tile && e.tile.src) {
+          logMessage('ok', layerId + ' ✓');
+        }
+      });
+      layer.on('tileerror', function (e) {
+        logMessage('error', layerId + ' ✗');
+      });
+    }
+
+    function setActiveLayer(layerId) {
+      if (!LAYERS[layerId]) return;
+      if (activeLayer) {
+        map.removeLayer(activeLayer);
+      }
+      const layerCfg = LAYERS[layerId];
+      const newLayer = createLeafletLayer(layerCfg);
+      activeLayer = newLayer;
+      activeLayerId = layerId;
+      attachLoggingToLayer(activeLayer, layerId);
+      activeLayer.addTo(map);
+      logMessage('info', 'Actieve laag: ' + layerCfg.name);
+      updateUrlFromMap();
+    }
+
+    function updateUrlFromMap() {
+      if (!map) return;
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+      updateUrlParams({
+        x: center.lng.toFixed(6),
+        y: center.lat.toFixed(6),
+        z: zoom,
+        laag: activeLayerId
+      });
+    }
+
+    // ---------- Lagen-UI ----------
+    const layerControlDiv = document.getElementById('layer-control');
+
+    function buildLayerList() {
+      layerControlDiv.innerHTML = '<h4>Lagen (' + Object.keys(LAYERS).length + ')</h4>';
+      Object.keys(LAYERS).forEach(function (id) {
+        const cfg = LAYERS[id];
+        const item = document.createElement('div');
+        item.className = 'layer-item';
+
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'layer-radio';
+        radio.value = id;
+        radio.id = 'layer-radio-' + id;
+        if (id === activeLayerId) radio.checked = true;
+
+        const label = document.createElement('label');
+        label.setAttribute('for', radio.id);
+        label.textContent = cfg.name;
+
+        const infoBtn = document.createElement('button');
+        infoBtn.className = 'info-btn';
+        infoBtn.textContent = 'i';
+        infoBtn.title = 'Toon laagdetails';
+
+        radio.addEventListener('change', function () {
+          if (this.checked) setActiveLayer(id);
+        });
+
+        infoBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          showLayerInfo(id);
+        });
+
+        item.appendChild(radio);
+        item.appendChild(label);
+        item.appendChild(infoBtn);
+        layerControlDiv.appendChild(item);
+      });
+    }
+
+    // ---------- Info-paneel ----------
+    const layerInfoDiv = document.getElementById('layer-info');
+    const layerInfoContentDiv = document.getElementById('layer-info-content');
+    const layerInfoCloseBtn = document.getElementById('layer-info-close');
+
+    function showLayerInfo(layerId) {
+      const cfg = LAYERS[layerId];
+      if (!cfg) return;
+      const infoObj = {
+        id: cfg.id,
+        name: cfg.name,
+        type: cfg.type,
+        url: cfg.url,
+        options: cfg.options,
+        description: cfg.description
+      };
+      layerInfoContentDiv.textContent = JSON.stringify(infoObj, null, 2);
+      layerInfoDiv.style.display = 'block';
+    }
+
+    layerInfoCloseBtn.addEventListener('click', function () {
+      layerInfoDiv.style.display = 'none';
+    });
+
+    // ---------- Start ----------
+    loadConfig();
+  </script>
+</body>
+</html>
