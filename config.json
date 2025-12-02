@@ -1,0 +1,70 @@
+{
+  "default": {
+    "lat": 52.1,
+    "lng": 5.1,
+    "zoom": 7
+  },
+  "layers": {
+    "osm": {
+      "id": "osm",
+      "name": "OSM (XYZ)",
+      "type": "xyz",
+      "url": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      "options": {
+        "maxZoom": 19,
+        "attribution": "© OpenStreetMap contributors"
+      },
+      "description": "Standaard OpenStreetMap-achtergrond (XYZ-tiles)."
+    },
+    "topo_wms": {
+      "id": "topo_wms",
+      "name": "Mundialis TOPO-WMS (WMS)",
+      "type": "wms",
+      "url": "https://ows.mundialis.de/services/service?",
+      "options": {
+        "layers": "TOPO-WMS",
+        "format": "image/png",
+        "transparent": true,
+        "attribution": "© mundialis, OSM contributors"
+      },
+      "description": "WMS-laag TOPO-WMS via mundialis OGC-service."
+    },
+    "srtm_wms": {
+      "id": "srtm_wms",
+      "name": "Mundialis SRTM30 Colored (WMS)",
+      "type": "wms",
+      "url": "https://ows.mundialis.de/services/service?",
+      "options": {
+        "layers": "SRTM30-Colored-Hillshade",
+        "format": "image/png",
+        "transparent": true,
+        "attribution": "© mundialis, OSM contributors"
+      },
+      "description": "SRTM30 gekleurde hillshade WMS-laag."
+    },
+    "wmts_as_xyz": {
+      "id": "wmts_as_xyz",
+      "name": "ArcGIS WMTS (als XYZ)",
+      "type": "xyz",
+      "url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      "options": {
+        "maxZoom": 19,
+        "attribution": "Demo WMTS→XYZ (hier OSM als placeholder)"
+      },
+      "description": "Voorbeeld van een WMTS-laag die als XYZ-URL wordt aangesproken. URL moet normaliter gebouwd worden obv WMTS capabilities."
+    },
+    "geonovum_wms": {
+      "id": "geonovum_wms",
+      "name": "Geonovum BGT (WMS)",
+      "type": "wms",
+      "url": "https://service.pdok.nl/brtachtergrondkaart/wms/v2_0?",
+      "options": {
+        "layers": "BGT10s",
+        "format": "image/png",
+        "transparent": true,
+        "attribution": "© PDOK"
+      },
+      "description": "Nederlandse BGT-achtergrondkaart via PDOK WMS."
+    }
+  }
+}
