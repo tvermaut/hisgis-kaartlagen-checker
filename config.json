@@ -20,7 +20,7 @@
       "id": "osm1832",
       "name": "Kadaster 1832 (OSM stijl)",
       "type": "wms",
-      "url": "https://geoservices.hisgis.nl/wmts/osm1832/{z}/{x}}/{y}.png",
+      "url": "https://geoservices.hisgis.nl/wmts/osm1832/{z}/{x}/{y}.png",
       "options": {
         "maxZoom": 24
       },
