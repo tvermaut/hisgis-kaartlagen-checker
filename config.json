@@ -30,7 +30,7 @@
       "id": "pdok_bestuurlijke_gebieden",
       "name": "moderne gemeentegrenzen",
       "type": "mvt",
-      "url": "https://api.pdok.nl/kadaster/bestuurlijkegebieden/ogc/v1/collections/bestuurlijkegebieden/tiles/WebMercatorQuad/{z}/{x}/{y}.pbf",
+      "url": "https://api.pdok.nl/kadaster/bestuurlijkegebieden/ogc/v1/tiles/WebMercatorQuad/{z}/{x}/{y}?f=mvt",
       "options": {
         "vectorTileLayerStyles": {
           "gemeenten": {
