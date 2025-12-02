@@ -298,24 +298,24 @@
       return null;
     }
 
-    function attachLoggingToLayer(layer, layerId) {
+    function attachLoggingToLayer(layer, layerId, layerConfig) {
       if (!layer) return;
       
-      // Voor raster tiles (WMS/XYZ)
-      if (layerConfig && layerConfig.type !== 'mvt') {
-        layer.on('tileloadstart', function (e) {
+      // Voor raster lagen (WMS, XYZ)
+      if (!layerConfig || layerConfig.type !== 'mvt') {
+        layer.on('tileloadstart', function(e) {
           if (e.tile && e.tile.src) {
             logMessage('start', layerId + ' → ' + e.tile.src);
           }
         });
-        layer.on('tileload', function (e) {
+        layer.on('tileload', function() {
           logMessage('ok', layerId + ' ✓');
         });
-        layer.on('tileerror', function (e) {
+        layer.on('tileerror', function() {
           logMessage('error', layerId + ' ✗');
         });
       } else {
-        // Voor MVT: log tile loads via loading event
+        // Voor MVT layers: gebruik loading/layer events
         layer.on('loading', function() {
           logMessage('start', layerId + ' MVT loading...');
         });
@@ -335,15 +335,11 @@
       }
       const layerCfg = LAYERS[layerId];
       const newLayer = createLeafletLayer(layerCfg);
-      if (!newLayer) {
-        logMessage('error', 'Laag ' + layerId + ' kan niet aangemaakt worden');
-        return;
-      }
       activeLayer = newLayer;
       activeLayerId = layerId;
-      attachLoggingToLayer(activeLayer, layerId);
+      attachLoggingToLayer(activeLayer, layerId, layerCfg);
       activeLayer.addTo(map);
-      logMessage('info', 'Actieve laag: ' + layerCfg.name + ' (' + layerCfg.type + ')');
+      logMessage('info', 'Actieve laag: ' + layerCfg.name);
       updateUrlFromMap();
     }
 
