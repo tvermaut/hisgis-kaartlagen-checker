@@ -37,6 +37,7 @@
             "gemeentegebied":  {"type": "line", "paint": {"line-color": "rgb(  0, 0,   0)","line-width": 1 }},
             "provinciegebied": {"type": "line", "paint": {"line-color": "rgb(255, 0,   0)","line-width": 2 }},
             "landgebied":      {"type": "line", "paint": {"line-color": "rgb(  0, 0, 255)","line-width": 2 }}
+            }
       },
       "description": "Moderne gemeente-grenzen afkomstig van het kadaster."
     },
