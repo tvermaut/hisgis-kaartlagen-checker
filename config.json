@@ -32,9 +32,13 @@
       "type": "mvt",
       "url": "https://api.pdok.nl/kadaster/bestuurlijkegebieden/ogc/v1/tiles/WebMercatorQuad/{z}/{x}/{y}?f=mvt",
       "options": {
-        "maxZoom": 24
+        "maxZoom": 17,
+            "vectorTileLayerStyles": {
+            "gemeentegebied":  {"type": "line", "paint": {"line-color": "rgb(  0, 0,   0)","line-width": 1 }},
+            "provinciegebied": {"type": "line", "paint": {"line-color": "rgb(255, 0,   0)","line-width": 2 }},
+            "landgebied":      {"type": "line", "paint": {"line-color": "rgb(  0, 0, 255)","line-width": 2 }}
       },
-      "description": "minuutplans 1832 van de tileserver."
+      "description": "Moderne gemeente-grenzen afkomstig van het kadaster."
     },
     "minuutplans": {
       "id": "minuutplans",
