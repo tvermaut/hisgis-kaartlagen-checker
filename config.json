@@ -26,11 +26,11 @@
       },
       "description": "HisGIS 1832 in OSM stijl"
     },
-    "pdok_bestuurlijke_gebieden": {
-      "id": "pdok_bestuurlijke_gebieden",
+    "pdok_bestuurlijke_tilejson": {
+      "id": "pdok_bestuurlijke_tilejson",
       "name": "moderne gemeentegrenzen",
-      "type": "mvt",
-      "url": "https://api.pdok.nl/kadaster/bestuurlijkegebieden/ogc/v1/tiles/WebMercatorQuad/{z}/{x}/{y}?f=mvt",
+      "type": "tilejson",
+      "url": "https://api.pdok.nl/kadaster/bestuurlijkegebieden/ogc/v1/tiles/WebMercatorQuad?f=tilejson",
       "options": {
         "vectorTileLayerStyles": {
           "gemeenten": {
@@ -56,9 +56,10 @@
           }
         },
         "interactive": true,
-        "maxZoom": 14
+        "minZoom": 6,
+        "maxZoom": 17
       },
-      "description": "PDOK Bestuurlijke Gebieden vector tiles met gemeenten, provincies en rijksgrens in één laag."
+      "description": "PDOK Bestuurlijke Gebieden via TileJSON (gemeenten, provincies, rijksgrens)."
     },
     "minuutplans": {
       "id": "minuutplans",
